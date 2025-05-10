@@ -54,8 +54,9 @@ func main() {
 	}
 
 	// Serve a documentação Swagger na rota /swagger/
+	// Use o IP do servidor para evitar problemas de CORS
 	router.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
-		httpSwagger.URL("http://localhost:"+port+"/swagger/doc.json"), // URL para o arquivo JSON do Swagger
+		httpSwagger.URL("/swagger/doc.json"), // Caminho relativo para evitar problemas de CORS
 		httpSwagger.DeepLinking(true),
 		httpSwagger.DocExpansion("list"),
 		httpSwagger.DomID("swagger-ui"),
@@ -63,9 +64,24 @@ func main() {
 
 	defer connection.Close()
 
+	// Middleware simples para liberar CORS
+	enableCORS := func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			if r.Method == "OPTIONS" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+
 	// Inicializa o servidor
-	log.Printf("Server running on http://localhost:%s", port)
-	if err := http.ListenAndServe(":"+port, router); err != nil {
+	log.Printf("Server running on http://0.0.0.0:%s", port)
+	log.Printf("Swagger running on http://0.0.0.0:%s/swagger/index.html", port)
+	if err := http.ListenAndServe(":"+port, enableCORS(router)); err != nil {
 		log.Fatal(err)
 	}
 }
