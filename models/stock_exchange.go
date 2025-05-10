@@ -1,15 +1,20 @@
 package models
 
 
+// StockExchange representa uma criptomoeda na exchange
 type StockExchange struct {
-	Id     int    `json:"id"`
-	Name   string `json:"name"`
-	Symbol string `json:"symbol"`
-	Price  float64 `json:"price"`
-	Valor  float64 `json:"valor"`
-	// Usar string para facilitar o Scan do SQLite em testes E2E
-	// Em produção, pode-se usar time.Time e tratar a conversão
-	CreatedAt string `json:"created_at"`
+	// ID único da criptomoeda
+	Id int `json:"id" example:"1"`
+	// Nome da criptomoeda
+	Name string `json:"name" example:"Bitcoin"`
+	// Símbolo da criptomoeda
+	Symbol string `json:"symbol" example:"BTC"`
+	// Preço atual em USD
+	Price float64 `json:"price" example:"45000.50"`
+	// Valor em BRL
+	Valor float64 `json:"valor" example:"225000.75"`
+	// Data e hora de criação do registro
+	CreatedAt string `json:"created_at" example:"2025-05-10 15:58:00"`
 }
 
 const (

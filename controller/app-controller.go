@@ -7,6 +7,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type AppController struct {
@@ -18,16 +20,31 @@ func NewAppController(db *sql.DB) *AppController {
 }
 
 
+// CryptoStats representa as estatísticas de preço de uma criptomoeda
 type CryptoStats struct {
-	MinPrice    float64 `json:"min_price"`
-	MaxPrice    float64 `json:"max_price"`
-	MediaMinima float64 `json:"media_minima"`
-	MediaMaxima float64 `json:"media_maxima"`
+	// Preço mínimo registrado no período
+	MinPrice float64 `json:"min_price" example:"42000.50"`
+	// Preço máximo registrado no período
+	MaxPrice float64 `json:"max_price" example:"45000.75"`
+	// Média dos preços mínimos diários
+	MediaMinima float64 `json:"media_minima" example:"43000.25"`
+	// Média dos preços máximos diários
+	MediaMaxima float64 `json:"media_maxima" example:"44500.80"`
 }
 
-// FindFilter executa a consulta agregada para ETH nos últimos 21 dias
-// Retorna estatísticas de preço em formato JSON
+// FindFilter busca estatísticas de criptomoedas pelo símbolo
+// @Summary Pesquisa estatísticas de criptomoedas
+// @Description Retorna preços mínimos, máximos e médias dos últimos 21 dias
+// @Tags Pesquisa
+// @Accept json
+// @Produce json
+// @Param symbol path string true "Símbolo da criptomoeda (ex: BTC, ETH)"
+// @Success 200 {object} CryptoStats
+// @Failure 400 {object} string "Símbolo inválido"
+// @Failure 500 {object} string "Erro ao buscar estatísticas"
+// @Router /app/pesquisa/{symbol} [get]
 func (c *AppController) FindFilter(w http.ResponseWriter, r *http.Request) {
+	symbol := mux.Vars(r)["symbol"]
 	// Consulta SQL utilizando CTE (WITH) para calcular estatísticas diárias
 	query := `
 		WITH daily_prices AS (
@@ -38,7 +55,7 @@ func (c *AppController) FindFilter(w http.ResponseWriter, r *http.Request) {
 			FROM
 				cryptos
 			WHERE
-				tag = 'ETH'
+				tag = ?
 				AND DATE(created_at) >= DATE('now', '-21 days')
 			GROUP BY
 				DATE(created_at)
@@ -54,7 +71,7 @@ func (c *AppController) FindFilter(w http.ResponseWriter, r *http.Request) {
 
 	// Executa a query e obtém os resultados agregados
 	var stats CryptoStats
-	err := c.Db.QueryRowContext(r.Context(), query).Scan(
+	err := c.Db.QueryRowContext(r.Context(), query, symbol).Scan(
 		&stats.MinPrice,
 		&stats.MaxPrice,
 		&stats.MediaMinima,
@@ -71,4 +88,3 @@ func (c *AppController) FindFilter(w http.ResponseWriter, r *http.Request) {
 	// Retorna o resultado em JSON para o frontend
 	json.NewEncoder(w).Encode(stats)
 }
-

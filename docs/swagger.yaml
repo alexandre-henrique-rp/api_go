@@ -1,0 +1,224 @@
+basePath: /
+definitions:
+  controller.CryptoStats:
+    properties:
+      max_price:
+        description: Preço máximo registrado no período
+        example: 45000.75
+        type: number
+      media_maxima:
+        description: Média dos preços máximos diários
+        example: 44500.8
+        type: number
+      media_minima:
+        description: Média dos preços mínimos diários
+        example: 43000.25
+        type: number
+      min_price:
+        description: Preço mínimo registrado no período
+        example: 42000.5
+        type: number
+    type: object
+  models.StockExchange:
+    properties:
+      created_at:
+        description: Data e hora de criação do registro
+        example: "2025-05-10 15:58:00"
+        type: string
+      id:
+        description: ID único da criptomoeda
+        example: 1
+        type: integer
+      name:
+        description: Nome da criptomoeda
+        example: Bitcoin
+        type: string
+      price:
+        description: Preço atual em USD
+        example: 45000.5
+        type: number
+      symbol:
+        description: Símbolo da criptomoeda
+        example: BTC
+        type: string
+      valor:
+        description: Valor em BRL
+        example: 225000.75
+        type: number
+    type: object
+host: localhost:3030
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API para gerenciamento de dados de criptomoedas
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: API de Criptomoedas
+  version: "1.0"
+paths:
+  /api/stock-exchange:
+    get:
+      consumes:
+      - application/json
+      description: Lista os últimos 100 registros de criptomoedas
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.StockExchange'
+            type: array
+        "500":
+          description: Erro ao buscar registros
+          schema:
+            type: string
+      summary: Lista todos os registros
+      tags:
+      - StockExchange
+    post:
+      consumes:
+      - application/json
+      description: Cria um novo registro de criptomoeda
+      parameters:
+      - description: Dados da criptomoeda
+        in: body
+        name: stockExchange
+        required: true
+        schema:
+          $ref: '#/definitions/models.StockExchange'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.StockExchange'
+        "400":
+          description: Erro nos dados enviados
+          schema:
+            type: string
+      summary: Cria um novo registro
+      tags:
+      - StockExchange
+  /api/stock-exchange/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove um registro de criptomoeda
+      parameters:
+      - description: StockExchange ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Registro deletado com sucesso
+          schema:
+            type: string
+        "404":
+          description: Registro não encontrado
+          schema:
+            type: string
+      summary: Remove um registro
+      tags:
+      - StockExchange
+    get:
+      consumes:
+      - application/json
+      description: Busca um registro de criptomoeda pelo ID
+      parameters:
+      - description: StockExchange ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.StockExchange'
+        "404":
+          description: Registro não encontrado
+          schema:
+            type: string
+      summary: Busca um registro
+      tags:
+      - StockExchange
+    put:
+      consumes:
+      - application/json
+      description: Atualiza um registro de criptomoeda
+      parameters:
+      - description: StockExchange ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dados atualizados
+        in: body
+        name: stockExchange
+        required: true
+        schema:
+          $ref: '#/definitions/models.StockExchange'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.StockExchange'
+        "404":
+          description: Registro não encontrado
+          schema:
+            type: string
+      summary: Atualiza um registro
+      tags:
+      - StockExchange
+  /app/pesquisa/{symbol}:
+    get:
+      consumes:
+      - application/json
+      description: Retorna preços mínimos, máximos e médias dos últimos 21 dias
+      parameters:
+      - description: 'Símbolo da criptomoeda (ex: BTC, ETH)'
+        in: path
+        name: symbol
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.CryptoStats'
+        "400":
+          description: Símbolo inválido
+          schema:
+            type: string
+        "500":
+          description: Erro ao buscar estatísticas
+          schema:
+            type: string
+      summary: Pesquisa estatísticas de criptomoedas
+      tags:
+      - Pesquisa
+schemes:
+- http
+swagger: "2.0"
+tags:
+- description: Operações com criptomoedas
+  name: StockExchange
+- description: Consultas e estatísticas
+  name: Pesquisa

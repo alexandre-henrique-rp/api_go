@@ -7,12 +7,24 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func AppRoutes(router *mux.Router, db *sql.DB)  {
-	//criar uma base de rota
+// @title Rotas do App
+// @version 1.0
+// @description Rotas para consultas e estatísticas
+func AppRoutes(router *mux.Router, db *sql.DB) {
+	// Criar uma base de rota
 	app := router.PathPrefix("/app").Subrouter()
 
 	appController := controller.NewAppController(db)
 
-	//criar rota get
-	app.HandleFunc("/pesquisa", appController.FindFilter).Methods("GET")
+	// @Summary Pesquisa estatísticas de criptomoedas
+	// @Description Retorna preços mínimos, máximos e médias dos últimos 21 dias
+	// @Tags Pesquisa
+	// @Accept json
+	// @Produce json
+	// @Param symbol path string true "Símbolo da criptomoeda (ex: BTC, ETH)"
+	// @Success 200 {object} controller.CryptoStats
+	// @Failure 400 {object} string "Símbolo inválido"
+	// @Failure 500 {object} string "Erro ao buscar estatísticas"
+	// @Router /app/pesquisa/{symbol} [get]
+	app.HandleFunc("/pesquisa/{symbol}", appController.FindFilter).Methods("GET")
 }
