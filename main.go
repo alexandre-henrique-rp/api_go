@@ -18,7 +18,8 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-	routes.SetupRoutes(router, connection)
+	routes.ApiRoutes(router, connection)
+	routes.AppRoutes(router, connection)
 
 	defer connection.Close()
 	// inicializa o servidor

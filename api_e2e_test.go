@@ -41,7 +41,7 @@ func setupTestDB() *sql.DB {
 func setupTestServer() (*httptest.Server, *sql.DB) {
 	db := setupTestDB()
 	router := mux.NewRouter()
-	routes.SetupRoutes(router, db)
+	routes.ApiRoutes(router, db)
 	server := httptest.NewServer(router)
 	return server, db
 }

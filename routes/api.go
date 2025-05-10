@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func SetupRoutes(router *mux.Router, db *sql.DB)  {
+func ApiRoutes(router *mux.Router, db *sql.DB)  {
 	//criar uma base de rota
 	api := router.PathPrefix("/api").Subrouter()
 
